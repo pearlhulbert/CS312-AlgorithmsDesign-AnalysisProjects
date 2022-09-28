@@ -12,11 +12,11 @@ class CircleDoubleLinkedList:
         self.head = None
         self.tail = None
 
-    def getHead(self):
+    def get_head(self):
         return self.head
 
     # Function to create Circular Doubly Linked List
-    def insertTail(self, value):
+    def insert_tail(self, value):
         new_node = Node(value)
         if self.head is None:
             self.head = new_node
@@ -41,7 +41,7 @@ class CircleDoubleLinkedList:
             if node == self.tail.next:
                 break
 
-    def getSize(self):
+    def get_size(self):
         size = 0
         for _ in self:
             size += 1
