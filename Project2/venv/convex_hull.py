@@ -38,7 +38,7 @@ class Hull:
     def left_side(self):
         return self.list.head
 
-#This is O(1) or constant
+# Time complexity: O(1), only adds and subtracts
 def calculate_slope(left_node, right_node):
     x_1 = left_node.value.x()
     y_1 = left_node.value.y()
@@ -50,7 +50,7 @@ def calculate_slope(left_node, right_node):
 
     return slope
 
-
+#Time and space complexity: O(n), iterates for the number of points we have, stores points
 def upper_tangent(left_right_most, right_left_most, left_half, right_half):
     left_guess = left_right_most
     right_guess = right_left_most
@@ -58,34 +58,42 @@ def upper_tangent(left_right_most, right_left_most, left_half, right_half):
     curr_left = left_right_most
     curr_right = right_left_most
 
-    best_guess_slope = calculate_slope(curr_left, curr_right)
+    guess_slope = calculate_slope(curr_left, curr_right)
 
     found = False
 
     while not found:
         negative = False
         positive = False
+        #Look through left half, then right
         for i in range(left_half.size()):
+            #Look at node to left (counter clockwise)
             curr_left = curr_left.prev
+            #find slope with right
             new_slope = calculate_slope(curr_left, right_guess)
-            if new_slope < best_guess_slope:
+            #Look for a negative change, update if found
+            if new_slope < guess_slope:
                 left_guess = curr_left
                 negative = True
-                best_guess_slope = new_slope
+                guess_slope = new_slope
         for i in range(right_half.size()):
+            #Look at node to right (clockwise)
             curr_right = curr_right.next
+            #find slope with left
             new_slope = calculate_slope(left_guess, curr_right)
-            if new_slope > best_guess_slope:
+            #Check for positive change, update
+            if new_slope > guess_slope:
                 right_guess = curr_right
                 positive = True
-                best_guess_slope = new_slope
+                guess_slope = new_slope
+        #Continue until no change
         if not negative and not positive:
             found = True
 
-    # This is the value we actually need for combining the hulls
+    # Return right and left points we found
     return left_guess, right_guess
 
-
+#Time and space complexity: O(n), iterates for the number of points we have, stores points
 def lower_tangent(left_right_most, right_left_most, left_half, right_half):
     left_guess = left_right_most
     right_guess = right_left_most
@@ -93,43 +101,52 @@ def lower_tangent(left_right_most, right_left_most, left_half, right_half):
     curr_left = left_right_most
     curr_right = right_left_most
 
-    best_guess_slope = calculate_slope(curr_left, curr_right)
+    guess_slope = calculate_slope(curr_left, curr_right)
 
     found = False
 
     while not found:
         negative = False
         positive = False
+        #Check left half, then right
         for i in range(left_half.size()):
             curr_left = curr_left.next
+            #Check slope with right
             new_slope = calculate_slope(curr_left, right_guess)
-            if new_slope > best_guess_slope:
+            #Check for negative change
+            if new_slope > guess_slope:
                 left_guess = curr_left
                 negative = True
-                best_guess_slope = new_slope
+                guess_slope = new_slope
         for i in range(right_half.size()):
             curr_right = curr_right.prev
+            #Check slope with left
             new_slope = calculate_slope(left_guess, curr_right)
-            if new_slope < best_guess_slope:
+            #Check for positive change
+            if new_slope < guess_slope:
                 right_guess = curr_right
                 positive = True
-                best_guess_slope = new_slope
+                guess_slope = new_slope
+        #Keep going until no change
         if not negative and not positive:
             found = True
 
-    # This is the value we actually need for combining the hulls
+    #Return right and left points we found
     return left_guess, right_guess
 
+#Time and space complexity: O(n) because of upper and lower tangent
 def combine_hulls(left_half, right_half):
     left_right_most = left_half.right_side()
     right_left_most = right_half.left_side()
 
+    #Find upper and lower tangent lines
     upper_tangent_result = upper_tangent(left_right_most, right_left_most, left_half, right_half)
     lower_tangent_result = lower_tangent(left_right_most, right_left_most, left_half, right_half)
 
     left_upper_tangent, right_upper_tangent = upper_tangent_result
     left_lower_tangent, right_lower_tangent = lower_tangent_result
 
+    #Connect left to right for each
     left_upper_tangent.next = right_upper_tangent
     right_upper_tangent.prev = left_upper_tangent
 
@@ -138,6 +155,7 @@ def combine_hulls(left_half, right_half):
 
     merge_list = CircleDoubleLinkedList()
 
+    #Put upper start and end points in circle
     merge_list.head = right_upper_tangent
     merge_list.tail = left_upper_tangent
 
@@ -177,6 +195,8 @@ class ConvexHullSolver(QObject):
     def showText(self, text):
         self.view.displayStatusText(text)
 
+    #Time complexity: O(nlog(n)) according to the Master's Theorem
+    #Space complexity: O(n): still only ever need to store points
     def divide_and_conquer(self, points):
         if len(points) <= 1:
             linked_list_points = CircleDoubleLinkedList()
@@ -210,7 +230,7 @@ class ConvexHullSolver(QObject):
         final_hull = self.divide_and_conquer(points)
         polygon = []
 
-        # populate polygon list with values from linked list
+        #Polygon should be an array. so we need to populate it with linked list values before we draw it
         linked_list_hull = final_hull.list
         for val in linked_list_hull:
             next_node = val.next

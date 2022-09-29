@@ -46,9 +46,3 @@ class CircleDoubleLinkedList:
         for _ in self:
             size += 1
         return size
-
-    def makeList(self):
-        cdllToList = []
-        for el in self:
-            cdllToList.append(el.value)
-        return cdllToList
