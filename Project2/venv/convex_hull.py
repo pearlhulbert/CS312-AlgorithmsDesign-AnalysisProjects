@@ -38,7 +38,7 @@ class Hull:
     def left_side(self):
         return self.list.head
 
-# Time complexity: O(1), only adds and subtracts
+# Time complexity: O(1), only adds and subtracts, divides
 def calculate_slope(left_node, right_node):
     x_1 = left_node.value.x()
     y_1 = left_node.value.y()
@@ -216,6 +216,8 @@ class ConvexHullSolver(QObject):
 
     # This is the method that gets called by the GUI and actually executes
     # the finding of the hull
+    #Time complexity: O(nlog(n))
+    #Space Complexity: O(n)
     def compute_hull(self, points, pause, view):
         self.pause = pause
         self.view = view
