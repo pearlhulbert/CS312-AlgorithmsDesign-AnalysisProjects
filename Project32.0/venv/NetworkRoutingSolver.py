@@ -3,6 +3,7 @@
 
 from CS312Graph import *
 from PriorityQueueArray import *
+from BinaryHeap import *
 import time
 
 
@@ -45,24 +46,45 @@ class NetworkRoutingSolver:
         nodeList = self.network
         self.dist = {}
         self.prev = {}
-        for u in nodeList.nodes:
-            self.dist[u] = float('inf')
-            self.prev[u] = None
-        self.dist[nodeList.nodes[self.source]] = 0
+        Q = None
+        if not use_heap:
+            for u in nodeList.nodes:
+                self.dist[u] = float('inf')
+                self.prev[u] = None
+            self.dist[nodeList.nodes[self.source]] = 0
+            Q = PriorityQueueArray()
+            for node in self.dist:
+                Q.insert(node, self.dist[node])
 
-        Q = PriorityQueueArray()
-        for node in self.dist:
-            Q.insert(node, self.dist[node])
+            while len(Q.data) != 0:
+                u = Q.delete_min()
+                for edge in u.neighbors:
+                    v = edge.dest
+                    curr_dist = self.dist[u] + edge.length
+                    if self.dist[v] > curr_dist:
+                        self.dist[v] = curr_dist
+                        self.prev[v] = u
+                        Q.decrease_key(v, curr_dist)
+        else:
+            Q = BinaryHeap()
+            for u in nodeList.nodes:
+                Q.dist[u] = float('inf')
+                Q.prev[u] = None
+                Q.index[u] = u.node_id
+            Q.dist[nodeList.nodes[self.source]] = 0
 
-        while len(Q.data) != 0:
-            u = Q.delete_min()
-            for edge in u.neighbors:
-                v = edge.dest
-                curr_dist = self.dist[u] + edge.length
-                if self.dist[v] > curr_dist:
-                    self.dist[v] = curr_dist
-                    self.prev[v] = u
-                    Q.decrease_key(v, curr_dist)
+            Q.make_queue(nodeList.nodes)
+
+            while len(Q.tree) != 0:
+                u = Q.delete_min()
+                for edge in u.neighbors:
+                    v = edge.dest
+                    curr_dist = Q.dist[u] + edge.length
+                    if Q.dist[v] > curr_dist:
+                        Q.dist[v] = curr_dist
+                        Q.prev[v] = u
+                        Q.decrease_key(v, curr_dist)
+
         t2 = time.time()
         return (t2-t1)
 
