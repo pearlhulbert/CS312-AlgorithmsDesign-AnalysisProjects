@@ -25,6 +25,9 @@ class NetworkRoutingSolver:
         curr_node = end_node
 
         while curr_node.node_id is not self.source:
+            if self.prev[curr_node] is None:
+                total_length = float('inf')
+                break
             edge = self.edge_between(self.prev[curr_node], curr_node)
             path_edges.append((edge.src.loc, edge.dest.loc, '{:.0f}'.format(edge.length)))
             total_length += edge.length
@@ -66,16 +69,17 @@ class NetworkRoutingSolver:
                         self.prev[v] = u
                         Q.decrease_key(v, curr_dist)
         else:
-            Q = BinaryHeap()
+            Q = BinaryHeap(nodeList.nodes)
             for u in nodeList.nodes:
                 Q.dist[u] = float('inf')
                 Q.prev[u] = None
                 Q.index[u] = u.node_id
-            Q.dist[nodeList.nodes[self.source]] = 0
 
-            Q.make_queue(nodeList.nodes)
+            Q.setup_start_tree(self.source)
 
-            while len(Q.tree) != 0:
+            #Q.make_queue(nodeList.nodes)
+
+            while len(Q.tree_heap) != 0:
                 u = Q.delete_min()
                 for edge in u.neighbors:
                     v = edge.dest
@@ -83,7 +87,9 @@ class NetworkRoutingSolver:
                     if Q.dist[v] > curr_dist:
                         Q.dist[v] = curr_dist
                         Q.prev[v] = u
-                        Q.decrease_key(v, curr_dist)
+                        Q.decrease_key(v, curr_dist, Q.prev[v])
+
+            self.prev = Q.prev
 
         t2 = time.time()
         return (t2-t1)
