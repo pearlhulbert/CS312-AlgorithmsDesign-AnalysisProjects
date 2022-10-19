@@ -5,7 +5,9 @@ class BinaryHeap:
         self.dist = {}
         self.prev = {}
         self.index = {}
-        self.tree_heap = nodes
+        self.tree_heap = []
+        for node in nodes:
+            self.tree_heap.append(node)
 
     def decrease_key(self, curr_node, new_d, new_p):
         self.dist[curr_node] = new_d
@@ -44,9 +46,14 @@ class BinaryHeap:
 
     def delete_min(self):
         retVal = self.tree_heap[0]
-        self.swap(self.tree_heap[0], self.tree_heap[-1])
+        if len(self.tree_heap) == 1:
+            del self.tree_heap[0]
+            return retVal
+        #self.swap(self.tree_heap[0], self.tree_heap[-1])
+        self.tree_heap[0] = self.tree_heap[-1]
         del self.index[self.tree_heap[-1]]
         del self.tree_heap[-1]
+        self.index[self.tree_heap[0]] = 0
         self.sift_down(self.tree_heap[0])
         return retVal
 

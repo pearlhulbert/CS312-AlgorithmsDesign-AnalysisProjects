@@ -5,6 +5,7 @@ from CS312Graph import *
 from PriorityQueueArray import *
 from BinaryHeap import *
 import time
+import csv
 
 
 class NetworkRoutingSolver:
@@ -87,10 +88,14 @@ class NetworkRoutingSolver:
                     if Q.dist[v] > curr_dist:
                         Q.dist[v] = curr_dist
                         Q.prev[v] = u
-                        Q.decrease_key(v, curr_dist, Q.prev[v])
+                        Q.decrease_key(v, curr_dist, u)
 
             self.prev = Q.prev
 
         t2 = time.time()
+        print(t2, '\n')
+        with open('output_data.csv', 'a', newline='\n') as f:
+            writer = csv.writer(f)
+            writer.writerow([use_heap, t2 - t1, len(nodeList.nodes)])
         return (t2-t1)
 
