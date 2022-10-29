@@ -50,16 +50,19 @@ class NetworkRoutingSolver:
         nodeList = self.network
         self.dist = {}
         self.prev = {}
-        Q = None
+        #use array
         if not use_heap:
+            #initialize dist and prev
             for u in nodeList.nodes:
                 self.dist[u] = float('inf')
                 self.prev[u] = None
+            #first node has a dist of 0
             self.dist[nodeList.nodes[self.source]] = 0
             Q = PriorityQueueArray()
+            #make queue
             for node in self.dist:
                 Q.insert(node, self.dist[node])
-
+            #find the shortest path and update queue
             while len(Q.data) != 0:
                 u = Q.delete_min()
                 for edge in u.neighbors:
@@ -69,17 +72,19 @@ class NetworkRoutingSolver:
                         self.dist[v] = curr_dist
                         self.prev[v] = u
                         Q.decrease_key(v, curr_dist)
-        else:
+        else: #binary heap priority queue
+            #make queue
             Q = BinaryHeap(nodeList.nodes)
+            #inititalize dist, prev, and index (a dictionary that keeps track of the indices in the tree
             for u in nodeList.nodes:
                 Q.dist[u] = float('inf')
                 Q.prev[u] = None
                 Q.index[u] = u.node_id
 
+            #set start node to 0, make sure source node is at beginning of tree
             Q.setup_start_tree(self.source)
 
-            #Q.make_queue(nodeList.nodes)
-
+            #find shortest paths
             while len(Q.tree_heap) != 0:
                 u = Q.delete_min()
                 for edge in u.neighbors:
