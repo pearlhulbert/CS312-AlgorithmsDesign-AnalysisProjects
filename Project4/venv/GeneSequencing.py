@@ -54,7 +54,7 @@ class GeneSequencing:
 
             for i in range(0, MAXINDELS + 1):
                 sequence_table[(i, 0)] = i * INDEL
-                if (i -1, 0) in self.backptrs:
+                if (i - 1, 0) in self.backptrs:
                     self.backptrs[(i, 0)] = (i - 1, 0)
                 else:
                     self.backptrs[(i, 0)] = None
@@ -77,6 +77,7 @@ class GeneSequencing:
                             left_cell = float('inf')
                         else:
                             left_cell = sequence_table[(i, j - 1)] + INDEL
+
                         if seq1[i - 1] == seq2[j - 1]:
                             sequence_table[(i, j)] = sequence_table[(i - 1, j - 1)] + MATCH
                             self.backptrs[(i, j)] = (i - 1, j - 1)
@@ -106,7 +107,10 @@ class GeneSequencing:
                     self.backptrs[(i, 0)] = None
             for j in range(0, len(seq2) + 1):
                 sequence_table[(0, j)] = j * INDEL
-                self.backptrs[(j, 0)] = None
+                if (0, j - 1) in self.backptrs:
+                    self.backptrs[(0, j)] = (0, j - 1)
+                else:
+                    self.backptrs[(0, j)] = None
 
             for i in range(1, len(seq1) + 1):
                 for j in range(1, len(seq2) + 1):
@@ -119,6 +123,7 @@ class GeneSequencing:
                         left_cell = float('inf')
                     else:
                         left_cell = sequence_table[(i, j - 1)] + INDEL
+
                     # document backtrace
                     if seq1[i - 1] == seq2[j - 1]:
                         sequence_table[(i, j)] = sequence_table[(i - 1, j - 1)] + MATCH
@@ -142,15 +147,17 @@ class GeneSequencing:
         prev_pos = self.backptrs[curr_pos]
 
         while prev_pos is not None:
-            if prev_pos == (curr_pos[0] - 1, curr_pos[1] - 1):
-                new_seq1 = seq1[curr_pos[0] - 1] + new_seq1
-                new_seq2 = seq2[curr_pos[1] - 1] + new_seq2
-            elif prev_pos == (curr_pos[0], curr_pos[1] - 1):
+            if prev_pos == (curr_pos[0], curr_pos[1] - 1):
                 new_seq1 = "-" + new_seq1
                 new_seq2 = seq2[curr_pos[1] - 1] + new_seq2
-            else:
+            elif prev_pos == (curr_pos[0] - 1, curr_pos[1]):
                 new_seq1 = seq1[curr_pos[0] - 1] + new_seq1
                 new_seq2 = "-" + new_seq2
+            elif prev_pos == (curr_pos[0] - 1, curr_pos[1] - 1):
+                new_seq1 = seq1[curr_pos[0] - 1] + new_seq1
+                new_seq2 = seq2[curr_pos[1] - 1] + new_seq2
+
+
             curr_pos = prev_pos
             prev_pos = self.backptrs[curr_pos]
 
