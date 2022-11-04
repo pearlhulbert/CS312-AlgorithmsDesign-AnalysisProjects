@@ -40,10 +40,9 @@ class GeneSequencing:
 
         sequence_table = {}
 
-        # populate table
-
         final_i = 0
         final_j = 0
+        #this is to dynamically change the for loop iterations
         start_place = 1
         # Calculate minimum cost to change one string to other
         if banded:
@@ -52,6 +51,7 @@ class GeneSequencing:
             if abs(len(seq1) - len(seq2)) > MAXINDELS:
                 return {'align_cost': float('inf'), 'seqi_first100': "no alignment", 'seqj_first100': "no alignmnet"}
 
+            #for loops to populate table are O(n), n being the length of the MAXINDELS
             for i in range(0, MAXINDELS + 1):
                 sequence_table[(i, 0)] = i * INDEL
                 if (i - 1, 0) in self.backptrs:
@@ -65,6 +65,7 @@ class GeneSequencing:
                 else:
                     self.backptrs[(0, j)] = None
 
+            #O(nk), where k is the length of the band (2*MAXINDELS+1, or d)
             for i in range(1, len(seq1) + 1):
                 for j in range(start_place, len(seq2) + 1):
                     if abs(i - j) <= MAXINDELS:
@@ -92,13 +93,16 @@ class GeneSequencing:
                             self.backptrs[(i, j)] = (i - 1, j - 1)
                         final_i = i
                         final_j = j
+                    #check to see if you've reached the end
                     if up_cell == float('inf'):
                         break
+                #increment start place after reaching MAXINDELS
                 if i >= MAXINDELS + 1:
                     start_place += 1
         else:
             self.backptrs = {}
 
+            #for loops to populate table are O(n), n being the length of the respective sequences
             for i in range(0, len(seq1) + 1):
                 sequence_table[(i, 0)] = i * INDEL
                 if (i - 1, 0) in self.backptrs:
@@ -112,6 +116,7 @@ class GeneSequencing:
                 else:
                     self.backptrs[(0, j)] = None
 
+            #O(nm), where n is the length of sequence1 and m is the length of sequence2
             for i in range(1, len(seq1) + 1):
                 for j in range(1, len(seq2) + 1):
                     diagonal_cell = sequence_table[(i - 1, j - 1)] + SUB
@@ -124,7 +129,6 @@ class GeneSequencing:
                     else:
                         left_cell = sequence_table[(i, j - 1)] + INDEL
 
-                    # document backtrace
                     if seq1[i - 1] == seq2[j - 1]:
                         sequence_table[(i, j)] = sequence_table[(i - 1, j - 1)] + MATCH
                         self.backptrs[(i, j)] = (i - 1, j - 1)
@@ -146,13 +150,17 @@ class GeneSequencing:
         curr_pos = (len(seq1), len(seq2))
         prev_pos = self.backptrs[curr_pos]
 
+        #Runs in O(n) time, n being the size of the backptrs dictionary, or length of the final final sequences
         while prev_pos is not None:
+            #left
             if prev_pos == (curr_pos[0], curr_pos[1] - 1):
                 new_seq1 = "-" + new_seq1
                 new_seq2 = seq2[curr_pos[1] - 1] + new_seq2
+            #up
             elif prev_pos == (curr_pos[0] - 1, curr_pos[1]):
                 new_seq1 = seq1[curr_pos[0] - 1] + new_seq1
                 new_seq2 = "-" + new_seq2
+            #diagonal
             elif prev_pos == (curr_pos[0] - 1, curr_pos[1] - 1):
                 new_seq1 = seq1[curr_pos[0] - 1] + new_seq1
                 new_seq2 = seq2[curr_pos[1] - 1] + new_seq2
