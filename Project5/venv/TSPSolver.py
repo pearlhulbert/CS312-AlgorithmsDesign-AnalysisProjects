@@ -16,6 +16,7 @@ import numpy as np
 from TSPClasses import *
 import heapq
 import itertools
+from MatrixStates import *
 
 
 
@@ -69,7 +70,6 @@ class TSPSolver:
 		return results
 
 	def lower_bound(self, city):
-		# make minimum cost matrix
 		pass
 
 
@@ -86,7 +86,51 @@ class TSPSolver:
 	'''
 
 	def greedy( self,time_allowance=60.0 ):
-		pass
+		results = {}
+		cities = self._scenario.getCities()
+		paths = self._scenario._edge_exists
+		ncities = len(cities)
+		current_city = cities[0]
+
+		# visited = []
+		solved_path = []
+		solved_path.append(current_city)
+		# visited.append(cities[0])
+		# solved_path.append(cities[0])
+		total_cost = 0
+		start_time = time.time()
+
+		# while time.time()-start_time < time_allowance:
+		for i in range(ncities):
+			current_paths = paths[cities.index(current_city)]
+			shortest_path = float('inf')
+			closest_city = None
+
+			for j in range(ncities):
+				if current_paths[j] == True:
+					if cities[j] not in solved_path:
+						distance = current_city.costTo(cities[j])
+						if distance < shortest_path:
+							shortest_path = distance
+							closest_city = cities[j]
+
+			if closest_city != None:
+				# visited.append(closest_city)
+				solved_path.append(closest_city)
+				current_city = closest_city
+				total_cost += shortest_path
+
+		bssf = TSPSolution(solved_path)
+		end_time = time.time()
+
+		results['cost'] = bssf.cost
+		results['time'] = end_time - start_time
+		results['count'] = 1
+		results['soln'] = bssf
+		results['max'] = None
+		results['total'] = None
+		results['pruned'] = None
+		return results
 	
 	
 	
@@ -98,23 +142,64 @@ class TSPSolver:
 		not include the initial BSSF), the best solution found, and three more ints: 
 		max queue size, total number of states created, and number of pruned states.</returns> 
 	'''
+
+	def find_neighbors(self, city):
+		cities = self._scenario.getCities
+		city_neighbors = []
+
+		for cit in cities:
+			if city.costTo(cit):
+				city_neighbors.append(cit)
+
+		return city_neighbors
+
 		
 	def branchAndBound( self, time_allowance=60.0 ):
-		P_0 = self._scenario.getCities()[0]
-		stack = []
-		stack.append(P_0)
-		BSSF = self.defaultRandomTour(time_allowance)['cost']
 
-		while len(stack) != 0:
-			P = stack.pop()
-			if lower_bound(P) < BSSF:
-				for P_i in P._scenario.getCities():
-					if P.cost(P_i) is not math.inf and P.costTo(P_i) < BSSF:
-						BSSF = P_i.costTo(P)
-					elif lower_bound(P) < BSSF:
-						stack.append(P)
+		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), from_place=self._scenario.getCities()[0])
+		BSSF = self.defaultRandomTour(time_allowance)
 
-		return BSSF
+		stack = [init_mat_state]
+
+		while True:
+			curr_min_states = []
+
+			curr_min_cost = 0
+
+			for state in stack:
+				if state.min < curr_min_cost:
+					curr_min_cost = state.min
+					curr_min_states.clear()
+					curr_min_states.append(state)
+				elif state.min == curr_min_cost:
+					curr_min_states.append(state)
+
+			#clear layer
+
+			for state in curr_min_states:
+				for c in state.not_visited(self._scenario.getCities()):
+					next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
+
+					if next_state.min < BSSF['cost']:
+						BSSF['cost'] = curr_min_cost
+
+
+
+		# P_0 = self._scenario.getCities()[0]
+		# stack = []
+		# stack.append(P_0)
+		# BSSF = self.defaultRandomTour(time_allowance)['cost']
+		#
+		# while len(stack) != 0:
+		# 	P = stack.pop()
+		# 	if lower_bound(P) < BSSF:
+		# 		for P_i in P._scenario.getCities():
+		# 			if P.cost(P_i) is not math.inf and P.costTo(P_i) < BSSF:
+		# 				BSSF = P_i.costTo(P)
+		# 			elif lower_bound(P) < BSSF:
+		# 				stack.append(P)
+		#
+		# return BSSF
 
 
 
