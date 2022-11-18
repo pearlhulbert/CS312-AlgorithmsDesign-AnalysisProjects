@@ -156,17 +156,16 @@ class TSPSolver:
 		
 	def branchAndBound( self, time_allowance=60.0 ):
 
-		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), from_place=self._scenario.getCities()[0])
+		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), first_city=self._scenario.getCities()[0])
 		BSSF = self.defaultRandomTour(time_allowance)
 
-		stack = [init_mat_state]
+		state_list = [init_mat_state]
 
 		while True:
 			curr_min_states = []
-
 			curr_min_cost = 0
 
-			for state in stack:
+			for state in state_list:
 				if state.min < curr_min_cost:
 					curr_min_cost = state.min
 					curr_min_states.clear()
@@ -182,8 +181,6 @@ class TSPSolver:
 
 					if next_state.min < BSSF['cost']:
 						BSSF['cost'] = curr_min_cost
-
-
 
 		# P_0 = self._scenario.getCities()[0]
 		# stack = []
