@@ -46,8 +46,8 @@ class MatrixState:
                 self.dist[i] -= min(self.dist[:, i])
 
     def restrict_matrix(self):
-        self.dist[self.from_place._index] = np.full(np.inf)
-        self.dist[self.to_place._index] = np.full(np.inf)
+        self.dist[self.from_place._index] = np.full(len(self.dist), np.inf)
+        self.dist[:, self.to_place._index] = np.full(len(self.dist), np.inf)
 
         self.dist[self.to_place._index][self.from_place._index] = np.inf
 

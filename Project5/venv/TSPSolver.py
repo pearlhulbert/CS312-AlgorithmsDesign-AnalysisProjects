@@ -156,47 +156,55 @@ class TSPSolver:
 		
 	def branchAndBound( self, time_allowance=60.0 ):
 
+		results = {}
+
 		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), first_city=self._scenario.getCities()[0])
 		BSSF = self.defaultRandomTour(time_allowance)
 
+		init_city = self._scenario.getCities()[0]
 		state_list = [init_mat_state]
 
-		while True:
-			curr_min_states = []
-			curr_min_cost = 0
+		layer_stack = [state_list]
+
+		while layer_stack:
+
+			curr_min_cost = np.inf
+			next_list = []
 
 			for state in state_list:
-				if state.min < curr_min_cost:
-					curr_min_cost = state.min
-					curr_min_states.clear()
-					curr_min_states.append(state)
-				elif state.min == curr_min_cost:
-					curr_min_states.append(state)
+				if not state.not_visited(self._scenario.getCities()):
+					if state.to_place.costTo(init_city) < np.inf:
+						BSSF['cost'] += state.to_place.costTo(init_city)
+						state_list.clear()
 
-			#clear layer
+						sol_route = state.visited
+						sol_route.append(init_city)
+						soln = TSPSolution(sol_route)
+						end_time = time.time()
 
-			for state in curr_min_states:
+						#BSSF  = results
+						BSSF['cost'] = state.min
+						BSSF['time'] = end_time - start_time
+						BSSF['count'] = BSSF['count']
+						BSSF['soln'] = soln
+						BSSF['max'] = None
+						BSSF['total'] = None
+						BSSF['pruned'] = None
+						#make array of results
+
+
 				for c in state.not_visited(self._scenario.getCities()):
-					next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
+					if state.to_place.costTo(c):
+						next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
 
-					if next_state.min < BSSF['cost']:
-						BSSF['cost'] = curr_min_cost
-
-		# P_0 = self._scenario.getCities()[0]
-		# stack = []
-		# stack.append(P_0)
-		# BSSF = self.defaultRandomTour(time_allowance)['cost']
-		#
-		# while len(stack) != 0:
-		# 	P = stack.pop()
-		# 	if lower_bound(P) < BSSF:
-		# 		for P_i in P._scenario.getCities():
-		# 			if P.cost(P_i) is not math.inf and P.costTo(P_i) < BSSF:
-		# 				BSSF = P_i.costTo(P)
-		# 			elif lower_bound(P) < BSSF:
-		# 				stack.append(P)
-		#
-		# return BSSF
+					# if next_state.min < curr_min_cost:
+					# 	curr_min_cost = next_state.min
+					next_list.append(next_state)
+				if next_list:
+					layer_stack.append(next_list)
+				BSSF['cost'] = curr_min_cost if curr_min_cost < np.inf else BSSF['cost']
+				if not layer_stack:
+					layer_stack.pop()
 
 
 
