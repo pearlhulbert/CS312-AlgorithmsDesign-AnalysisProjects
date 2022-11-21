@@ -143,69 +143,68 @@ class TSPSolver:
 		max queue size, total number of states created, and number of pruned states.</returns> 
 	'''
 
-	def find_neighbors(self, city):
-		cities = self._scenario.getCities
-		city_neighbors = []
-
-		for cit in cities:
-			if city.costTo(cit):
-				city_neighbors.append(cit)
-
-		return city_neighbors
-
 		
 	def branchAndBound( self, time_allowance=60.0 ):
-
-		results = {}
+		bssf = self.defaultRandomTour(time_allowance)
 
 		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), first_city=self._scenario.getCities()[0])
-		BSSF = self.defaultRandomTour(time_allowance)
 
 		init_city = self._scenario.getCities()[0]
 		state_list = [init_mat_state]
 
-		layer_stack = [state_list]
+		solutions = []
 
-		while layer_stack:
+		start_time = time.time()
+		while state_list and time.time() - start_time < time_allowance:
+			state = state_list.pop()
 
-			curr_min_cost = np.inf
-			next_list = []
+			if not state.not_visited(self._scenario.getCities()):
+				if state.to_place.costTo(init_city) < np.inf:
+					bssf['count'] += 1
 
-			for state in state_list:
-				if not state.not_visited(self._scenario.getCities()):
-					if state.to_place.costTo(init_city) < np.inf:
-						BSSF['cost'] += state.to_place.costTo(init_city)
-						state_list.clear()
+					state_visited = state.visited
+					curr_solution = TSPSolution(state_visited)
 
-						sol_route = state.visited
-						sol_route.append(init_city)
-						soln = TSPSolution(sol_route)
-						end_time = time.time()
+					results = {
+						'cost': state.curr_cost + state.to_place.costTo(init_city),
+						'count': bssf['count'],
+						'soln': curr_solution,
+						'max': None,
+						'total': None,
+						'pruned': None
+					}
 
-						#BSSF  = results
-						BSSF['cost'] = state.min
-						BSSF['time'] = end_time - start_time
-						BSSF['count'] = BSSF['count']
-						BSSF['soln'] = soln
-						BSSF['max'] = None
-						BSSF['total'] = None
-						BSSF['pruned'] = None
-						#make array of results
+					solutions.append(results)
+
+			temp = []
+			for c in state.not_visited(self._scenario.getCities()):
+				if state.curr_place.costTo(c) < np.inf:
+					next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
+
+					temp.append(next_state)
 
 
-				for c in state.not_visited(self._scenario.getCities()):
-					if state.to_place.costTo(c):
-						next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
+			total_len = len(temp)
+			prune_amt = math.ceil(total_len * 0.5)
+			temp = heapq.nsmallest(total_len - prune_amt, temp, key=lambda x: x.curr_cost)
+			state_list.extend(temp)
 
-					# if next_state.min < curr_min_cost:
-					# 	curr_min_cost = next_state.min
-					next_list.append(next_state)
-				if next_list:
-					layer_stack.append(next_list)
-				BSSF['cost'] = curr_min_cost if curr_min_cost < np.inf else BSSF['cost']
-				if not layer_stack:
-					layer_stack.pop()
 
+		end_time = time.time()
+
+		best = solutions[0]
+		for sol in solutions:
+			best = sol if sol['cost'] < best['cost'] else best
+
+		final_result = {}
+		final_result['cost'] = best['cost']
+		final_result['time'] = end_time - start_time
+		final_result['count'] = len(solutions)
+		final_result['soln'] = best['soln']
+		final_result['max'] = None
+		final_result['total'] = None
+		final_result['pruned'] = None
+		return final_result
 
 
 

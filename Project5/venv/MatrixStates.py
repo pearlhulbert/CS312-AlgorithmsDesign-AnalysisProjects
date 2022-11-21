@@ -5,20 +5,19 @@ class MatrixState:
 
     def __init__(self, state=None, to_place=None, from_place=None, city_matrix=None, first_city=None):
         self.dist = []
-        self.min = 0
+        self.curr_cost = 0
         self.visited = []
 
-        if to_place is not None and from_place is not None:
-            self.to_place = to_place
-            self.from_place = from_place
-        else:
-            self.to_place = None
-            self.from_place = None
+        self.from_place = from_place
+        self.to_place = to_place
+
+        self.curr_place = first_city if first_city is not None else to_place
 
         if state is not None:
             self.dist = np.copy(state.dist)
-            self.visited = state.visited.copy
+            self.visited = state.visited.copy()
             self.visited.append(to_place)
+            self.curr_cost = state.curr_cost + state.current_place.costTo(to_place)
 
         elif city_matrix is not None:
             self.visited.append(first_city)
@@ -27,8 +26,8 @@ class MatrixState:
                 for j in range(len(city_matrix)):
                     self.dist[i][j] = city_matrix[i].costTo(city_matrix[j])
 
-        #if statement here
-        self.restrict_matrix()
+        if from_place is not None and to_place is not None:
+            self.restrict_matrix()
         self.min_cost_matrix()
 
 
@@ -56,5 +55,7 @@ class MatrixState:
         for c in cities_list:
             if c._index not in self.visited:
                 not_visited.append(c)
-
         return not_visited
+
+    def get_total_cities(self) -> int:
+        return len(self.visited)
