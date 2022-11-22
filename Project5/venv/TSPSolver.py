@@ -67,7 +67,7 @@ class TSPSolver:
 		results['soln'] = bssf
 		results['max'] = None
 		results['total'] = None
-		results['pruned'] = None
+		results['pruned'] = 0
 		return results
 
 	def lower_bound(self, city):
@@ -148,7 +148,7 @@ class TSPSolver:
 	def branchAndBound( self, time_allowance=60.0 ):
 		bssf = self.defaultRandomTour(time_allowance)
 
-		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), first_city=self._scenario.getCities()[0])
+		init_mat_state = MatrixState(city_matrix=self._scenario.getCities(), first_city=self._scenario.getCities()[0])
 
 		init_city = self._scenario.getCities()[0]
 		heap = MinHeap()
@@ -191,7 +191,7 @@ class TSPSolver:
 				if state.curr_place.costTo(c) < np.inf:
 					next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
 
-					if next_state.cost < bssf['cost']:
+					if next_state.curr_cost < bssf['cost']:
 						heap.insert(
 							next_state.priority(len(self._scenario.getCities())),
 							next_state

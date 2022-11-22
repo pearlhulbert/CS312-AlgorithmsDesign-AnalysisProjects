@@ -17,11 +17,11 @@ class MatrixState:
             self.dist = np.copy(state.dist)
             self.visited = state.visited.copy()
             self.visited.append(to_place)
-            self.curr_cost = state.curr_cost + state.current_place.costTo(to_place)
+            self.curr_cost = state.curr_cost + state.curr_place.costTo(to_place)
 
         elif city_matrix is not None:
             self.visited.append(first_city)
-            self.dist = np.zeros(len(city_matrix), len(city_matrix))
+            self.dist = np.zeros((len(city_matrix), len(city_matrix)))
             for i in range(len(city_matrix)):
                 for j in range(len(city_matrix)):
                     self.dist[i][j] = city_matrix[i].costTo(city_matrix[j])
@@ -35,13 +35,13 @@ class MatrixState:
         for i in range(len(self.dist)):
             curr_min = np.min(self.dist[i])
             if curr_min != np.inf:
-                self.min += min(self.dist[i])
-                self.dist[i] -= min(self.dist[i])
+                self.curr_cost += np.min(self.dist[i])
+                self.dist[i] -= np.min(self.dist[i])
 
         for i in range(len(self.dist)):
             curr_min = np.min(self.dist[:, i])
             if curr_min != np.inf:
-                self.min += min(self.dist[:, i])
+                self.curr_cost += min(self.dist[:, i])
                 self.dist[i] -= min(self.dist[:, i])
 
     def restrict_matrix(self):

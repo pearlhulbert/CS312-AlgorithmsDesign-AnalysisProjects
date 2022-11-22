@@ -13,7 +13,7 @@ class MinHeap:
         return self
 
     def insert(self, p, o):
-        heapq.heappush(self._heap, (p, self._life_count, o))
+        heapq.heappush(self._min_heap, (p, self._life_count, o))
         self._life_count += 1
 
     def pop_top(self):
