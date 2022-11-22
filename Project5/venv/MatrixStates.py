@@ -30,7 +30,6 @@ class MatrixState:
             self.restrict_matrix()
         self.min_cost_matrix()
 
-
     def min_cost_matrix(self):
         for i in range(len(self.dist)):
             curr_min = np.min(self.dist[i])
@@ -53,7 +52,7 @@ class MatrixState:
     def not_visited(self, cities_list):
         not_visited = []
         for c in cities_list:
-            if c._index not in self.visited:
+            if c not in self.visited:
                 not_visited.append(c)
         return not_visited
 
