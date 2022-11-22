@@ -40,8 +40,8 @@ class MatrixState:
         for i in range(len(self.dist)):
             curr_min = np.min(self.dist[:, i])
             if curr_min != np.inf:
-                self.curr_cost += min(self.dist[:, i])
-                self.dist[i] -= min(self.dist[:, i])
+                self.curr_cost += np.min(self.dist[:, i])
+                self.dist[:, i] -= np.min(self.dist[:, i])
 
     def restrict_matrix(self):
         self.dist[self.from_place._index] = np.full(len(self.dist), np.inf)

@@ -164,10 +164,10 @@ class TSPSolver:
 				break
 
 			if not state.not_visited(self._scenario.getCities()):
-				if state.curr_place.costTo(init_city) < np.inf:
+				if state.to_place.costTo(init_city) < np.inf:
 
 					if state.curr_cost < bssf['cost']:
-						bssf['cost'] = state.curr_cost
+						bssf['cost'] = state.curr_cost + state.to_place.costTo(init_city)
 
 
 					bssf['count'] += 1
@@ -189,7 +189,7 @@ class TSPSolver:
 
 			for c in state.not_visited(self._scenario.getCities()):
 				if state.curr_place.costTo(c) < np.inf:
-					next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
+					next_state = MatrixState(state=state, from_place=state.curr_place, to_place=c)
 
 					if next_state.curr_cost < bssf['cost']:
 						heap.insert(
