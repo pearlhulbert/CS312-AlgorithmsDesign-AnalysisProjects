@@ -14,6 +14,7 @@ class MatrixState:
 
         self.curr_place = first_city if first_city is not None else to_place
 
+        # editing current state
         if state is not None:
             self.dist = np.copy(state.dist)
             # time: O(n^2) for copy
@@ -21,6 +22,7 @@ class MatrixState:
             self.visited.append(to_place)
             self.curr_cost = state.curr_cost + state.curr_place.costTo(to_place)
 
+        # initial call, making new state
         elif city_matrix is not None:
             self.visited.append(first_city)
             # space: O(n^2) for matrix
@@ -61,7 +63,7 @@ class MatrixState:
     # time and space: O(n)
     def not_visited(self, cities_list):
         not_visited = []
-        # time: O(n) for for loop
+        # time: O(n) for loop
         for c in cities_list:
             if c not in self.visited:
                 # space: O(n), adding n elements to not_visited

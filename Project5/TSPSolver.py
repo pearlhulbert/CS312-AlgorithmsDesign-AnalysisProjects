@@ -105,6 +105,7 @@ class TSPSolver:
 		start_time = time.time()
 		# time: for loop is O(n), plus inner for loop is O(n^2)
 		# space: O(1), same space is used every time
+		# finished route, found a solution
 		for state in heap:
 			if time.time() - start_time > time_allowance:
 				break
@@ -112,6 +113,7 @@ class TSPSolver:
 				break
 
 			# all operations in here are O(1)
+			# finished route, found a solution
 			if not state.not_visited(self._scenario.getCities()):
 				if state.to_place.costTo(init_city) < np.inf:
 
@@ -136,11 +138,14 @@ class TSPSolver:
 					solutions.append(results)
 
 			# time: for loop is O(n), insert is O(log(n))., so overall it's O(n)
+			# go through every city that has not been visited yet
 			for c in state.not_visited(self._scenario.getCities()):
+				# create a new state if there is a path
 				if state.curr_place.costTo(c) < np.inf:
 					next_state = MatrixState(state=state, from_place=state.curr_place, to_place=c)
 					bssf['total'] += 1
 
+					# if the path is better than the bssf, insert that state into the heap
 					if next_state.curr_cost < bssf['cost']:
 						heap.insert(
 							next_state.priority(len(self._scenario.getCities())),
