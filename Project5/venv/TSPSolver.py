@@ -206,8 +206,12 @@ class TSPSolver:
 		for sol in solutions:
 			best = sol if sol['cost'] < best['cost'] else best
 
+		new_cost = 0
+		for i in range(len(best['soln'].route)):
+			new_cost += best['soln'].route[i].costTo(best['soln'].route[(i + 1) % len(best['soln'].route)])
+
 		final_result = {}
-		final_result['cost'] = best['cost']
+		final_result['cost'] = new_cost
 		final_result['time'] = end_time - start_time
 		final_result['count'] = len(solutions)
 		final_result['soln'] = best['soln']
