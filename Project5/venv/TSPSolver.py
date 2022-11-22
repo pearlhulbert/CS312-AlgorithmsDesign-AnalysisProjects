@@ -17,6 +17,7 @@ from TSPClasses import *
 import heapq
 import itertools
 from MatrixStates import *
+from MinHeap import MinHeap
 
 
 
@@ -150,16 +151,25 @@ class TSPSolver:
 		init_mat_state = MatrixState(self, city_matrix=self._scenario.getCities(), first_city=self._scenario.getCities()[0])
 
 		init_city = self._scenario.getCities()[0]
-		state_list = [init_mat_state]
+		heap = MinHeap()
+		heap.insert(init_mat_state.priority(len(self._scenario.getCities())), init_mat_state)
 
 		solutions = []
 
 		start_time = time.time()
-		while state_list and time.time() - start_time < time_allowance:
-			state = state_list.pop()
+		for state in heap:
+			if time.time() - start_time > time_allowance:
+				break
+			if state is None:
+				break
 
 			if not state.not_visited(self._scenario.getCities()):
-				if state.to_place.costTo(init_city) < np.inf:
+				if state.curr_place.costTo(init_city) < np.inf:
+
+					if state.curr_cost < bssf['cost']:
+						bssf['cost'] = state.curr_cost
+
+
 					bssf['count'] += 1
 
 					state_visited = state.visited
@@ -176,18 +186,18 @@ class TSPSolver:
 
 					solutions.append(results)
 
-			temp = []
+
 			for c in state.not_visited(self._scenario.getCities()):
 				if state.curr_place.costTo(c) < np.inf:
 					next_state = MatrixState(state=state, from_place=state.from_place, to_place=c)
 
-					temp.append(next_state)
-
-
-			total_len = len(temp)
-			prune_amt = math.ceil(total_len * 0.5)
-			temp = heapq.nsmallest(total_len - prune_amt, temp, key=lambda x: x.curr_cost)
-			state_list.extend(temp)
+					if next_state.cost < bssf['cost']:
+						heap.insert(
+							next_state.priority(len(self._scenario.getCities())),
+							next_state
+						)
+					else:
+						bssf['pruned'] += 1
 
 
 		end_time = time.time()
@@ -203,7 +213,7 @@ class TSPSolver:
 		final_result['soln'] = best['soln']
 		final_result['max'] = None
 		final_result['total'] = None
-		final_result['pruned'] = None
+		final_result['pruned'] = bssf['pruned']
 		return final_result
 
 

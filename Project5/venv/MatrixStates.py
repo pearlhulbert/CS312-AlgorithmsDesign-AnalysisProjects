@@ -57,5 +57,5 @@ class MatrixState:
                 not_visited.append(c)
         return not_visited
 
-    def get_total_cities(self) -> int:
-        return len(self.visited)
+    def priority(self, total: int) -> float:
+        return (total - len(self.visited)) * self.curr_cost
